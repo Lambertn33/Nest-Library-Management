@@ -33,10 +33,10 @@ model User {
 
 model Book {
   id          Int         @unique @default(autoincrement())
-  title       String
+  title       String      @unique
   description String
   author      String
-  book_no     String
+  book_no     String      @unique
   isAvailable Boolean     @default(true)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
