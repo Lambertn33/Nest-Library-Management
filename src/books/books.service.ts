@@ -1,10 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
+import { BooksHelper } from './helpers/books.helpers';
 
 @Injectable()
 export class BooksService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly booksHelper: BooksHelper,
+  ) {}
 
   async findAll(page = 1, limit = 10) {
     const skip = (page - 1) * limit;
@@ -29,7 +33,7 @@ export class BooksService {
     };
   }
   async findOne(id: number) {
-    const book = await this._getBook(id);
+    const book = await this.booksHelper._getBook(id);
     if (!book) {
       throw new BadRequestException('no book with such ID available');
     }
@@ -39,6 +43,26 @@ export class BooksService {
 
   async create(newBookInputs: Prisma.BookCreateInput) {
     const { author, book_no, description, title } = newBookInputs;
+    const checkBookTitle = await this.booksHelper._doesBookExist(
+      'title',
+      title,
+    );
+    const checkBookNumber = await this.booksHelper._doesBookExist(
+      'book_no',
+      book_no,
+    );
+
+    if (checkBookTitle) {
+      throw new BadRequestException(
+        'A book with such title exists in the Database',
+      );
+    }
+
+    if (checkBookNumber) {
+      throw new BadRequestException(
+        'A book with such book no exists in the Database',
+      );
+    }
     const newBook = await this.databaseService.book.create({
       data: {
         author,
@@ -54,47 +78,62 @@ export class BooksService {
     };
   }
 
-  async update(id: number, data: Prisma.BookUpdateInput) {}
+  async update(id: number, data: Prisma.BookUpdateInput) {
+    const book = await this.booksHelper._getBook(id);
+    if (!book) {
+      throw new BadRequestException('no book with such ID available');
+    }
 
-  async delete(id: number) {}
+    if (!book.isAvailable) {
+      throw new BadRequestException(
+        'Book that has been borrowed cannot be edited',
+      );
+    }
 
-  async _isBookBorrowed(id: number) {}
+    // we make sure that there is no other book with same ID expect only this one (by checking the ID)
+    if (data.title) {
+      await this.booksHelper._checkUniqueFieldExistence(
+        'title',
+        data.title as string,
+        id,
+      );
+    }
 
-  // check if book title has not been taken before
-  async _doesBookTitleExist(title: string) {
-    const book = await this.databaseService.book.findFirst({
-      where: {
-        title: {
-          equals: title,
-          mode: 'insensitive',
-        },
-      },
+    // we make sure that there is no other book with same ID expect only this one (by checking the ID)
+    if (data.book_no) {
+      await this.booksHelper._checkUniqueFieldExistence(
+        'book_no',
+        data.book_no as string,
+        id,
+      );
+    }
+
+    return this.databaseService.book.update({
+      where: { id },
+      data,
     });
-
-    return !!book;
   }
 
-  //check if book number has not been taken before
-  async _doesBookNumberExist(bookNo: string) {
-    const book = await this.databaseService.book.findFirst({
-      where: {
-        book_no: {
-          equals: bookNo,
-          mode: 'insensitive',
-        },
-      },
-    });
+  async delete(id: number) {
+    const book = await this.booksHelper._getBook(id);
+    if (!book) {
+      throw new BadRequestException('no book with such ID available');
+    }
 
-    return !!book;
-  }
+    if (!book.isAvailable) {
+      throw new BadRequestException(
+        'Book that has been borrowed cannot be deleted',
+      );
+    }
 
-  async _getBook(id: number) {
-    const book = this.databaseService.book.findUnique({
+    await this.databaseService.book.delete({
       where: {
         id,
       },
     });
 
-    return book ? book : null;
+    return {
+      message: 'Book deleted successfully',
+    };
   }
 }

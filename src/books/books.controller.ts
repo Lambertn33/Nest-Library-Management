@@ -1,10 +1,11 @@
 import {
-  BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -15,6 +16,7 @@ import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { UserRole } from 'src/auth/enum/role.enum';
 import { CreateBookDto } from './dto/create.dto';
+import { UpdateBookDto } from './dto/update.dto';
 
 @Controller('books')
 export class BooksController {
@@ -37,25 +39,23 @@ export class BooksController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   async create(@Body() data: CreateBookDto) {
-    const checkBookTitle = await this.booksService._doesBookTitleExist(
-      data.title,
-    );
-    const checkBookNumber = await this.booksService._doesBookNumberExist(
-      data.book_no,
-    );
-
-    if (checkBookTitle) {
-      throw new BadRequestException(
-        'A book with such title exists in the Database',
-      );
-    }
-
-    if (checkBookNumber) {
-      throw new BadRequestException(
-        'A book with such book no exists in the Database',
-      );
-    }
-
     return this.booksService.create(data);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateBookDto,
+  ) {
+    return this.booksService.update(id, data);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.booksService.delete(id);
   }
 }
