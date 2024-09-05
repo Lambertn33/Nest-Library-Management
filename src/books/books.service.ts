@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 
@@ -28,7 +28,14 @@ export class BooksService {
       },
     };
   }
-  async findOne(id: number) {}
+  async findOne(id: number) {
+    const book = await this._getBook(id);
+    if (!book) {
+      throw new BadRequestException('no book with such ID available');
+    }
+
+    return book;
+  }
 
   async create(newBookInputs: Prisma.BookCreateInput) {
     const { author, book_no, description, title } = newBookInputs;
@@ -79,5 +86,15 @@ export class BooksService {
     });
 
     return !!book;
+  }
+
+  async _getBook(id: number) {
+    const book = this.databaseService.book.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return book ? book : null;
   }
 }
