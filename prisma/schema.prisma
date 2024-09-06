@@ -18,29 +18,37 @@ enum Role {
   USER
 }
 
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model User {
-  id        Int         @unique @default(autoincrement())
-  names     String
-  email     String
-  role      Role        @default(USER)
-  password  String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  Borrowing Borrowing[]
+  id            Int             @unique @default(autoincrement())
+  names         String
+  email         String
+  role          Role            @default(USER)
+  password      String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  Borrowing     Borrowing[]
+  BorrowRequest BorrowRequest[]
 
   @@map("users")
 }
 
 model Book {
-  id          Int         @unique @default(autoincrement())
-  title       String      @unique
-  description String
-  author      String
-  book_no     String      @unique
-  isAvailable Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  Borrowing   Borrowing[]
+  id            Int             @unique @default(autoincrement())
+  title         String          @unique
+  description   String
+  author        String
+  book_no       String          @unique
+  isAvailable   Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  Borrowing     Borrowing[]
+  BorrowRequest BorrowRequest[]
 
   @@map("books")
 }
@@ -57,4 +65,18 @@ model Borrowing {
   returned_date DateTime?
 
   @@map("borrowings")
+}
+
+model BorrowRequest {
+  id          Int           @unique @default(autoincrement())
+  user        User          @relation(fields: [userId], references: [id])
+  userId      Int
+  book        Book          @relation(fields: [bookId], references: [id])
+  bookId      Int
+  status      RequestStatus @default(PENDING)
+  requestedAt DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  reason      String
+
+  @@map("borrow_requests")
 }
