@@ -49,5 +49,6 @@ export class BooksHelper {
         `Another book with this ${fieldName} already exists`,
       );
     }
+    return null;
   }
 }
