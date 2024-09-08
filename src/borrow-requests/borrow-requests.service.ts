@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { BorrowRequestsHelper } from './helpers/borrow-requests.helpers';
 import { BorrowRequestStatus } from './enum/borrow-requests.enum';
+import { CreateBorrowRequestDto } from './dto/create.dto';
 
 @Injectable()
 export class BorrowRequestsService {
@@ -36,6 +36,11 @@ export class BorrowRequestsService {
 
   // for admin
   async getSingleBorrowRequest(id: number) {
+    const check = await this.borrowRequestsHelper._getBorrowRequest(id);
+    if (!check) {
+      throw new NotFoundException('no request with such ID in the database');
+    }
+
     return this.databaseService.borrowRequest.findUnique({
       where: {
         id,
@@ -81,7 +86,7 @@ export class BorrowRequestsService {
   async makeBorrowRequest(
     bookId: number,
     userId: number,
-    data: Prisma.BorrowRequestCreateInput,
+    data: CreateBorrowRequestDto,
   ) {
     const { reason } = data;
     const newBorrowRequest = await this.databaseService.borrowRequest.create({
@@ -102,7 +107,7 @@ export class BorrowRequestsService {
 
   // for admin
   async approveBorrowRequest(id: number) {
-    return this.borrowRequestsHelper._updateBorrowRequestStatus(
+    return await this.borrowRequestsHelper._updateBorrowRequestStatus(
       id,
       BorrowRequestStatus.ACCEPTED,
       'Borrow request approved successfully',
@@ -111,7 +116,7 @@ export class BorrowRequestsService {
 
   // for admin
   async rejectBorrowRequest(id: number) {
-    return this.borrowRequestsHelper._updateBorrowRequestStatus(
+    return await this.borrowRequestsHelper._updateBorrowRequestStatus(
       id,
       BorrowRequestStatus.CANCELED,
       'Borrow request approved successfully',
@@ -120,9 +125,9 @@ export class BorrowRequestsService {
 
   // for user
   async cancelBorrowRequest(id: number) {
-    return this.borrowRequestsHelper._updateBorrowRequestStatus(
+    return await this.borrowRequestsHelper._updateBorrowRequestStatus(
       id,
-      BorrowRequestStatus.ACCEPTED,
+      BorrowRequestStatus.CANCELED,
       'You have canceled your request successfully',
     );
   }
