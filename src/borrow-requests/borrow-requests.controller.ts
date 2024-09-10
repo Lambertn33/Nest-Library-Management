@@ -45,6 +45,13 @@ export class BorrowRequestsController {
     );
   }
 
+  @Get('my-requests')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER)
+  async getMyRequests(@CurrentUser() user: any) {
+    return this.borrowRequestsService.getMyBorrowRequests(user.userId);
+  }
+
   @Put(':id/approve')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
