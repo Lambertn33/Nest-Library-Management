@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { BorrowRequestsService } from './borrow-requests.service';
@@ -14,7 +15,6 @@ import { UserRole } from 'src/auth/enum/role.enum';
 import { Roles } from 'src/auth/roles.decorator';
 import { CreateBorrowRequestDto } from './dto/create.dto';
 import { CurrentUser } from 'src/auth/current-user.decorator';
-import { User } from '@prisma/client';
 
 @Controller('borrow-requests')
 export class BorrowRequestsController {
@@ -43,5 +43,26 @@ export class BorrowRequestsController {
       user.userId,
       data,
     );
+  }
+
+  @Put(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async approve(@Param('id', ParseIntPipe) id: number) {
+    return this.borrowRequestsService.approveBorrowRequest(id);
+  }
+
+  @Put(':id/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async reject(@Param('id', ParseIntPipe) id: number) {
+    return this.borrowRequestsService.rejectBorrowRequest(id);
+  }
+
+  @Put(':id/cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER)
+  async cancel(@Param('id', ParseIntPipe) id: number) {
+    return this.borrowRequestsService.cancelBorrowRequest(id);
   }
 }

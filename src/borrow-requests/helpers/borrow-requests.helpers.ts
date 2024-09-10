@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { BorrowRequestStatus } from '../enum/borrow-requests.enum';
 
@@ -18,6 +14,7 @@ export class BorrowRequestsHelper {
     return borrowRequest ? borrowRequest : null;
   }
 
+  // update to CANCELED/APPROVED/REJECTED.
   async _updateBorrowRequestStatus(
     id: number,
     status: BorrowRequestStatus,
@@ -25,9 +22,9 @@ export class BorrowRequestsHelper {
   ) {
     const borrowRequest = this._getBorrowRequest(id);
     if (!borrowRequest) {
-      throw new BadRequestException('no borrow request with such ID available');
+      throw new NotFoundException('no borrow request with such ID available');
     }
-    this.databaseService.borrowRequest.update({
+    await this.databaseService.borrowRequest.update({
       where: { id },
       data: {
         status,

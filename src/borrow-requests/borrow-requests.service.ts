@@ -14,6 +14,9 @@ export class BorrowRequestsService {
   // for admin
   async getAllBorrowRequests() {
     return this.databaseService.borrowRequest.findMany({
+      where: {
+        status: BorrowRequestStatus.PENDING,
+      },
       include: {
         user: {
           select: {
@@ -118,8 +121,8 @@ export class BorrowRequestsService {
   async rejectBorrowRequest(id: number) {
     return await this.borrowRequestsHelper._updateBorrowRequestStatus(
       id,
-      BorrowRequestStatus.CANCELED,
-      'Borrow request approved successfully',
+      BorrowRequestStatus.REJECTED,
+      'Borrow request rejected successfully',
     );
   }
 
