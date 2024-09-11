@@ -59,12 +59,23 @@ export class BorrowsService {
       where: { id: borrowRequestId },
     });
 
+    // after accepting a borrow request, create the corresponding borrow
     await this.databaseService.borrowing.create({
       data: {
         reason: borrowRequest.reason,
         bookId: borrowRequest.bookId,
         userId: borrowRequest.userId,
         borrowed_date: borrowRequest.requestedAt,
+      },
+    });
+
+    // update the book to show that it is not available(it has been borrowed)
+    await this.databaseService.book.update({
+      where: {
+        id: borrowRequest.bookId,
+      },
+      data: {
+        isAvailable: false,
       },
     });
   }
