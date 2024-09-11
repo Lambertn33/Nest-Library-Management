@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { BorrowRequestsHelper } from './helpers/borrow-requests.helpers';
 import { BorrowRequestStatus } from './enum/borrow-requests.enum';
 import { CreateBorrowRequestDto } from './dto/create.dto';
 import { BorrowsService } from 'src/borrows/borrows.service';
+import { BooksHelper } from 'src/books/helpers/books.helpers';
 
 @Injectable()
 export class BorrowRequestsService {
@@ -11,6 +16,7 @@ export class BorrowRequestsService {
     private readonly databaseService: DatabaseService,
     private readonly borrowRequestsHelper: BorrowRequestsHelper,
     private readonly borrowsService: BorrowsService,
+    private readonly booksHelper: BooksHelper,
   ) {}
 
   // for admin
@@ -93,6 +99,14 @@ export class BorrowRequestsService {
     userId: number,
     data: CreateBorrowRequestDto,
   ) {
+    const checkIfBookIsBorrowed =
+      await this.booksHelper._hasBookBeenBorrowed(bookId);
+    if (checkIfBookIsBorrowed) {
+      throw new BadRequestException(
+        'The book you are trying to borrow has been borrowed',
+      );
+    }
+
     const { reason } = data;
     const newBorrowRequest = await this.databaseService.borrowRequest.create({
       data: {

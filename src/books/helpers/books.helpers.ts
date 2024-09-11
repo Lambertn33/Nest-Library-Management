@@ -51,4 +51,9 @@ export class BooksHelper {
     }
     return null;
   }
+
+  async _hasBookBeenBorrowed(id: number) {
+    const book = await this._getBook(id);
+    return !book.isAvailable;
+  }
 }
