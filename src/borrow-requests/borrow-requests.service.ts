@@ -3,12 +3,14 @@ import { DatabaseService } from 'src/database/database.service';
 import { BorrowRequestsHelper } from './helpers/borrow-requests.helpers';
 import { BorrowRequestStatus } from './enum/borrow-requests.enum';
 import { CreateBorrowRequestDto } from './dto/create.dto';
+import { BorrowsService } from 'src/borrows/borrows.service';
 
 @Injectable()
 export class BorrowRequestsService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly borrowRequestsHelper: BorrowRequestsHelper,
+    private readonly borrowsService: BorrowsService,
   ) {}
 
   // for admin
@@ -110,6 +112,7 @@ export class BorrowRequestsService {
 
   // for admin
   async approveBorrowRequest(id: number) {
+    await this.borrowsService.createBorrow(id);
     return await this.borrowRequestsHelper._updateBorrowRequestStatus(
       id,
       BorrowRequestStatus.ACCEPTED,

@@ -1,10 +1,12 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { BorrowsService } from './borrows.service';
 import { BorrowsController } from './borrows.controller';
 import { DatabaseModule } from 'src/database/database.module';
+import { BorrowRequestsModule } from 'src/borrow-requests/borrow-requests.module';
 
 @Module({
-  providers: [BorrowsService, DatabaseModule],
+  imports: [DatabaseModule, forwardRef(() => BorrowRequestsModule)],
+  providers: [BorrowsService],
   controllers: [BorrowsController],
   exports: [BorrowsService],
 })

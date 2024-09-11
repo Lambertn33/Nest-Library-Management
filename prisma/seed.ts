@@ -43,6 +43,23 @@ async function main() {
       });
     }
   }
+
+  for (let i = 1; i <= 10; i++) {
+    let check = await prisma.book.findFirst({
+      where: { title: `Book ${i}` },
+    });
+
+    if (!check) {
+      await prisma.book.create({
+        data: {
+          title: `Book ${i}`,
+          description: `Description of book ${i}`,
+          author: `Author ${i}`,
+          book_no: `book_no_${i}`,
+        },
+      });
+    }
+  }
 }
 
 main()
