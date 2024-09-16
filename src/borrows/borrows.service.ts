@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { BorrowStatus } from './enum/borrow-status.enum';
+import { BooksHelper } from 'src/books/helpers/books.helpers';
 
 @Injectable()
 export class BorrowsService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly booksHelper: BooksHelper,
+  ) {}
 
   async getAllBorrows(status?: BorrowStatus) {
     return this.databaseService.borrowing.findMany({
@@ -57,6 +61,18 @@ export class BorrowsService {
   async createBorrow(borrowRequestId: number) {
     const borrowRequest = await this.databaseService.borrowRequest.findUnique({
       where: { id: borrowRequestId },
+      include: {
+        user: {
+          select: {
+            names: true,
+          },
+        },
+        book: {
+          select: {
+            title: true,
+          },
+        },
+      },
     });
 
     // after accepting a borrow request, create the corresponding borrow
@@ -70,13 +86,30 @@ export class BorrowsService {
     });
 
     // update the book to show that it is not available(it has been borrowed)
-    await this.databaseService.book.update({
+    await this.booksHelper._changeBookAvailability(borrowRequest.bookId, false);
+    return {
+      message:
+        'Book marked as returned successfully and ready to be borrowed again',
+    };
+  }
+
+  async returnBook(id: number) {
+    const borrowData = await this.databaseService.borrowing.findUnique({
       where: {
-        id: borrowRequest.bookId,
-      },
-      data: {
-        isAvailable: false,
+        id,
       },
     });
+    await this.booksHelper._changeBookAvailability(borrowData.bookId, true);
+    await this.databaseService.borrowing.update({
+      where: { id },
+      data: {
+        returned_date: new Date(),
+      },
+    });
+
+    return {
+      message:
+        'Book marked as returned successfully and ready to be borrowed again',
+    };
   }
 }

@@ -3,7 +3,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Put,
+  Patch,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -30,6 +30,8 @@ export class BorrowsController {
     return this.borrowsService.getSingleBorrow(id);
   }
 
-  @Put(':/id/returnBook')
-  async confirmBookReturned(@Param('id', ParseIntPipe) id: number) {}
+  @Patch(':id/returnBook')
+  async confirmBookReturned(@Param('id', ParseIntPipe) id: number) {
+    return this.borrowsService.returnBook(id);
+  }
 }

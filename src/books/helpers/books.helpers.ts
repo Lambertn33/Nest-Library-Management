@@ -56,4 +56,13 @@ export class BooksHelper {
     const book = await this._getBook(id);
     return !book.isAvailable;
   }
+
+  async _changeBookAvailability(id: number, isAvailable: boolean) {
+    await this.databaseService.book.update({
+      where: { id },
+      data: {
+        isAvailable,
+      },
+    });
+  }
 }
