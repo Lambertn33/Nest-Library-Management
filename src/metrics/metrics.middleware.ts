@@ -8,7 +8,8 @@ export class MetricsMiddleware implements NestMiddleware {
   private readonly httpRequestDuration: Histogram<string>;
 
   constructor(private metricsService: MetricsService) {
-    this.httpRequestDuration = this.metricsService.getDbRequestDurationMetric();
+    this.httpRequestDuration =
+      this.metricsService.getHttpRequestDurationMetric();
   }
 
   use(req: Request, res: Response, next: NextFunction) {
