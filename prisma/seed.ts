@@ -44,7 +44,7 @@ async function main() {
     }
   }
 
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 40; i++) {
     let check = await prisma.book.findFirst({
       where: { title: `Book ${i}` },
     });
