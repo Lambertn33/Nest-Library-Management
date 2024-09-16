@@ -5,10 +5,19 @@ import { AuthModule } from './auth/auth.module';
 import { BooksModule } from './books/books.module';
 import { BorrowRequestsModule } from './borrow-requests/borrow-requests.module';
 import { BorrowsModule } from './borrows/borrows.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, BooksModule, BorrowRequestsModule, BorrowsModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    BooksModule,
+    BorrowRequestsModule,
+    BorrowsModule,
+    MetricsModule,
+  ],
   controllers: [],
   providers: [DatabaseService],
+  exports: [DatabaseService],
 })
 export class AppModule {}
