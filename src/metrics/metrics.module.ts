@@ -2,10 +2,11 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { MetricsService } from './metrics.service';
 import { MetricsMiddleware } from './metrics.middleware';
 import { MetricsController } from './metrics.controller';
+import { MetricsHelper } from './metrics.helpers';
 
 @Module({
-  providers: [MetricsService],
-  exports: [MetricsService],
+  providers: [MetricsService, MetricsHelper],
+  exports: [MetricsService, MetricsHelper],
   controllers: [MetricsController],
 })
 export class MetricsModule {

@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { BooksHelper } from './helpers/books.helpers';
 import { MetricsService } from 'src/metrics/metrics.service';
+import { MetricsHelper } from 'src/metrics/metrics.helpers';
 
 @Injectable()
 export class BooksService {
@@ -10,6 +11,7 @@ export class BooksService {
     private readonly databaseService: DatabaseService,
     private readonly booksHelper: BooksHelper,
     private readonly metricsService: MetricsService,
+    private readonly metricsHelper: MetricsHelper,
   ) {}
 
   async findAll(page = 1, limit = 10) {
@@ -38,7 +40,7 @@ export class BooksService {
         },
       };
     } catch (error) {
-      this.handleException(error, timer);
+      this.metricsHelper.handleException(error, timer);
     }
   }
 
@@ -52,7 +54,7 @@ export class BooksService {
       timer(); // Log the successful response time
       return book;
     } catch (error) {
-      this.handleException(error, timer);
+      this.metricsHelper.handleException(error, timer);
     }
   }
 
@@ -97,7 +99,7 @@ export class BooksService {
         newBook,
       };
     } catch (error) {
-      this.handleException(error, timer);
+      this.metricsHelper.handleException(error, timer);
     }
   }
 
@@ -137,7 +139,7 @@ export class BooksService {
         data,
       });
     } catch (error) {
-      this.handleException(error, timer);
+      this.metricsHelper.handleException(error, timer);
     }
   }
 
@@ -166,17 +168,7 @@ export class BooksService {
         message: 'Book deleted successfully',
       };
     } catch (error) {
-      this.handleException(error, timer);
-    }
-  }
-
-  private handleException(error: any, timer: () => void) {
-    if (error instanceof HttpException) {
-      timer();
-      throw error;
-    } else {
-      timer();
-      throw new HttpException('Internal Server Error', 500);
+      this.metricsHelper.handleException(error, timer);
     }
   }
 }
