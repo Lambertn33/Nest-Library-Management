@@ -16,13 +16,32 @@ The Borrow Management System API allows administrators to track and manage book 
 - [PostgreSQL](https://www.postgresql.org/) - Database
 - [Prisma](https://www.prisma.io/) - ORM
 - [JWT](https://jwt.io/) - Authentication
+- Docker
+- Docker compose
 
 ## Installation
 
-1. Clone the repository
-2. npm install
-3. npm run start:dev
+1. **Clone the Repository**
 
-## Environment variables
+   ```bash
+   git clone https://github.com/yourusername/your-repo.git
+   cd your-repo
 
-DATABASE_URL=postgresql://USERNAME:PASSWORD@localhost:5432/DB_NAME
+   ```
+
+2. **Start the services**
+   docker-compose up --build
+
+3. Migrating the DB:
+
+- docker exec -it nest_app sh
+- npx prisma db push
+
+### Running the Backend
+
+NestJS Backend: The application runs on port 3002. Ensure the DATABASE_URL in the Docker environment configuration matches your PostgreSQL setup.
+
+### Monitoring and Observability
+
+Prometheus: Accessible at http://localhost:9090. Used for metrics collection.
+Grafana: Accessible at http://localhost:3000. Used for visualization of metrics (credentials: admin/admin).
